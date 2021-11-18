@@ -4,7 +4,7 @@ import mlflow
 from TaxiFareModel.data import get_data, clean_data, df_optimized
 from TaxiFareModel.encoders import TimeFeaturesEncoder, DistanceTransformer
 from TaxiFareModel.utils import compute_rmse
-from TaxiFareModel.params import EXPERIMENT_NAME, BUCKET_NAME, MODEL_VERSION, MODEL_NAME, MLFLOW_URI
+from TaxiFareModel.params import EXPERIMENT_NAME, BUCKET_NAME, MODEL_VERSION, MODEL_NAME, MLFLOW_URI, FIT_PARAMS
 from memoized_property import memoized_property
 from mlflow.tracking import MlflowClient
 from sklearn.compose import ColumnTransformer
@@ -16,7 +16,7 @@ from google.cloud import storage
 
 
 class Trainer(object):
-    def __init__(self, X, y):
+    def __init__(self, X, y, **kwargs):
         """
             X: pandas DataFrame
             y: pandas Series
@@ -24,8 +24,8 @@ class Trainer(object):
         self.pipeline = None
         self.X = X
         self.y = y
+        self.kwargs = kwargs
         # for MLFlow
-        self.experiment_name = EXPERIMENT_NAME
 
     def set_experiment_name(self, experiment_name):
         '''defines the experiment name for MLFlow'''
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
     # Train and save model, locally and
     trainer = Trainer(X=X_train, y=y_train)
-    trainer.set_experiment_name('xp2')
+    trainer.set_experiment_name(EXPERIMENT_NAME)
     trainer.run()
     rmse = trainer.evaluate(X_test, y_test)
     print(f"rmse: {rmse}")
